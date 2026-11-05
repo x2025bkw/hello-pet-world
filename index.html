@@ -52,7 +52,11 @@
   .details-btn:focus-visible,
   .fav-btn:focus-visible,
   #modalFav:focus-visible,
-  #closeModal:focus-visible {
+  #closeModal:focus-visible,
+  .quiz-options button:focus-visible,
+  #matchBtn:focus-visible,
+  #resetQuiz:focus-visible,
+  .quiz-result button:focus-visible {
     outline: 3px solid #264653;
     outline-offset: 2px;
   }
@@ -155,6 +159,57 @@
     color: #888;
     font-size: 0.9rem;
   }
+  .quiz {
+    background: #fff;
+    border: 2px solid #ffd9a0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .quiz h2 { color: #d35400; margin-top: 0; }
+  .quiz-q { margin: 1rem 0; }
+  .quiz-options {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .quiz-options button {
+    background: #fff;
+    color: #d35400;
+    border: 2px solid #ffb59e;
+  }
+  .quiz-options button.selected {
+    background: #2a9d8f;
+    color: #fff;
+    border-color: #2a9d8f;
+  }
+  #matchBtn {
+    background: #ff7f50;
+    color: #fff;
+    margin-top: 0.5rem;
+  }
+  #resetQuiz {
+    background: #fff;
+    color: #d35400;
+    border: 2px solid #ffb59e;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+  }
+  .quiz-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #e9f5f3;
+    border-radius: 12px;
+  }
+  .quiz-result h3 { color: #d35400; margin: 0.5rem 0; }
+  .quiz-result button {
+    background: #2a9d8f;
+    color: #fff;
+    margin-top: 0.5rem;
+  }
   @media (max-width: 900px) {
     .grid { grid-template-columns: repeat(2, 1fr); }
   }
@@ -181,6 +236,38 @@
 
 <main>
   <div id="petGrid" class="grid"></div>
+
+  <section class="quiz" aria-labelledby="quizTitle">
+    <h2 id="quizTitle">🔍 Find Your Perfect Pet</h2>
+    <p>Answer three quick questions and we will match you with one of our six pets.</p>
+    <div class="quiz-q">
+      <p><strong>1. Dog or cat?</strong></p>
+      <div class="quiz-options" data-question="type">
+        <button type="button" data-value="dog">Dog</button>
+        <button type="button" data-value="cat">Cat</button>
+        <button type="button" data-value="any">Either</button>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p><strong>2. What energy level fits you?</strong></p>
+      <div class="quiz-options" data-question="energy">
+        <button type="button" data-value="playful">Playful</button>
+        <button type="button" data-value="calm">Calm</button>
+        <button type="button" data-value="any">Either</button>
+      </div>
+    </div>
+    <div class="quiz-q">
+      <p><strong>3. How much playtime can you give each day?</strong></p>
+      <div class="quiz-options" data-question="time">
+        <button type="button" data-value="lots">Lots</button>
+        <button type="button" data-value="little">A little</button>
+        <button type="button" data-value="any">Either</button>
+      </div>
+    </div>
+    <button type="button" id="matchBtn">Find my match</button>
+    <button type="button" id="resetQuiz" hidden>Try again</button>
+    <div id="quizResult" class="quiz-result" aria-live="polite" hidden></div>
+  </section>
 </main>
 
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName" hidden>
@@ -197,12 +284,12 @@
 
 <script>
   var pets = [
-    { id: 1, name: "Biscuit", type: "dog", breed: "Golden Retriever", age: 3, personality: "Friendly and goofy", activity: "Playing fetch", emoji: "🐶" },
-    { id: 2, name: "Milo", type: "dog", breed: "Beagle", age: 2, personality: "Curious and brave", activity: "Sniffing out trails", emoji: "🐕" },
-    { id: 3, name: "Ruby", type: "dog", breed: "French Bulldog", age: 4, personality: "Calm and cuddly", activity: "Napping in the sun", emoji: "🐩" },
-    { id: 4, name: "Whiskers", type: "cat", breed: "Tabby", age: 2, personality: "Playful and quick", activity: "Chasing string", emoji: "🐱" },
-    { id: 5, name: "Luna", type: "cat", breed: "Siamese", age: 1, personality: "Chatty and clever", activity: "Watching birds from the window", emoji: "🐈" },
-    { id: 6, name: "Oliver", type: "cat", breed: "Orange Tabby", age: 5, personality: "Lazy and loyal", activity: "Curling up on warm laps", emoji: "😺" }
+    { id: 1, name: "Biscuit", type: "dog", breed: "Golden Retriever", age: 3, personality: "Friendly and goofy", activity: "Playing fetch", emoji: "🐶", energy: "playful", time: "lots" },
+    { id: 2, name: "Milo", type: "dog", breed: "Beagle", age: 2, personality: "Curious and brave", activity: "Sniffing out trails", emoji: "🐕", energy: "playful", time: "lots" },
+    { id: 3, name: "Ruby", type: "dog", breed: "French Bulldog", age: 4, personality: "Calm and cuddly", activity: "Napping in the sun", emoji: "🐩", energy: "calm", time: "little" },
+    { id: 4, name: "Whiskers", type: "cat", breed: "Tabby", age: 2, personality: "Playful and quick", activity: "Chasing string", emoji: "🐱", energy: "playful", time: "lots" },
+    { id: 5, name: "Luna", type: "cat", breed: "Siamese", age: 1, personality: "Chatty and clever", activity: "Watching birds from the window", emoji: "🐈", energy: "calm", time: "little" },
+    { id: 6, name: "Oliver", type: "cat", breed: "Orange Tabby", age: 5, personality: "Lazy and loyal", activity: "Curling up on warm laps", emoji: "😺", energy: "calm", time: "little" }
   ];
 
   var favourites = {};
@@ -322,6 +409,53 @@
 
   document.getElementById("modalFav").addEventListener("click", function () {
     if (currentPetId !== null) toggleFavourite(currentPetId);
+  });
+
+  var quizAnswers = { type: null, energy: null, time: null };
+
+  document.querySelectorAll(".quiz-options").forEach(function (group) {
+    var question = group.getAttribute("data-question");
+    group.querySelectorAll("button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        group.querySelectorAll("button").forEach(function (b) { b.classList.remove("selected"); });
+        btn.classList.add("selected");
+        quizAnswers[question] = btn.getAttribute("data-value");
+      });
+    });
+  });
+
+  document.getElementById("matchBtn").addEventListener("click", function () {
+    var best = null;
+    var bestScore = -1;
+    pets.forEach(function (pet) {
+      var score = 0;
+      if (quizAnswers.type && quizAnswers.type !== "any" && pet.type === quizAnswers.type) score += 2;
+      if (quizAnswers.energy && quizAnswers.energy !== "any" && pet.energy === quizAnswers.energy) score += 2;
+      if (quizAnswers.time && quizAnswers.time !== "any" && pet.time === quizAnswers.time) score += 1;
+      if (score > bestScore) { bestScore = score; best = pet; }
+    });
+    if (!best) return;
+    if (bestScore === 0) {
+      best = pets[Math.floor(Math.random() * pets.length)];
+    }
+    var result = document.getElementById("quizResult");
+    result.innerHTML =
+      '<div class="pet-emoji" aria-hidden="true">' + best.emoji + "</div>" +
+      "<h3>Your match: " + best.name + "!</h3>" +
+      "<p>" + best.breed + " &middot; " + best.personality + ". Loves " + best.activity.toLowerCase() + ".</p>" +
+      '<button type="button" id="resultDetails">View ' + best.name + "'s details</button>";
+    result.hidden = false;
+    document.getElementById("resetQuiz").hidden = false;
+    document.getElementById("resultDetails").addEventListener("click", function () {
+      openModal(best.id);
+    });
+  });
+
+  document.getElementById("resetQuiz").addEventListener("click", function () {
+    quizAnswers = { type: null, energy: null, time: null };
+    document.querySelectorAll(".quiz-options button").forEach(function (b) { b.classList.remove("selected"); });
+    document.getElementById("quizResult").hidden = true;
+    document.getElementById("resetQuiz").hidden = true;
   });
 
   renderPets();
