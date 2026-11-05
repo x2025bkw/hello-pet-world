@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello Pet World</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #fff7e6;
+    color: #333;
+    line-height: 1.5;
+  }
+  header {
+    background: #ff7f50;
+    color: #fff;
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+  }
+  header h1 { margin: 0 0 0.5rem; font-size: 2.2rem; }
+  header p { margin: 0 auto 1.25rem; max-width: 560px; }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    align-items: center;
+  }
+  .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  button {
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    padding: 0.55rem 1.1rem;
+  }
+  .filters button {
+    background: #fff;
+    color: #d35400;
+    border-color: #fff;
+  }
+  .filters button.active {
+    background: #2a9d8f;
+    color: #fff;
+    border-color: #2a9d8f;
+  }
+  .filters button:focus-visible,
+  #randomBtn:focus-visible,
+  .details-btn:focus-visible,
+  .fav-btn:focus-visible,
+  #modalFav:focus-visible,
+  #closeModal:focus-visible {
+    outline: 3px solid #264653;
+    outline-offset: 2px;
+  }
+  #randomBtn {
+    background: #2a9d8f;
+    color: #fff;
+  }
+  .counter {
+    margin: 0;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  main { padding: 1.5rem 1rem 3rem; max-width: 1000px; margin: 0 auto; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  .card {
+    background: #fff;
+    border: 2px solid #ffd9a0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .pet-emoji { font-size: 4rem; line-height: 1.2; }
+  .card h2 { margin: 0.5rem 0 0.25rem; color: #d35400; }
+  .card p { margin: 0.25rem 0; }
+  .tag {
+    display: inline-block;
+    background: #e9f5f3;
+    color: #2a7f72;
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.9rem;
+  }
+  .details-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.9rem;
+    background: #ff7f50;
+    color: #fff;
+  }
+  .fav-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    background: #fff;
+    color: #d35400;
+    border-color: #ffb59e;
+  }
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 10;
+  }
+  .modal[hidden] { display: none; }
+  .modal-content {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+  }
+  #closeModal {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: #eee;
+    color: #333;
+    border-radius: 50%;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    font-size: 1rem;
+  }
+  .modal-emoji { font-size: 4.5rem; line-height: 1.2; }
+  .modal-content h2 { color: #d35400; margin: 0.5rem 0; }
+  .modal-content dl {
+    text-align: left;
+    margin: 1rem 0;
+  }
+  .modal-content dt { font-weight: bold; color: #2a7f72; }
+  .modal-content dd { margin: 0 0 0.5rem; }
+  #modalFav {
+    background: #2a9d8f;
+    color: #fff;
+  }
+  footer {
+    text-align: center;
+    padding: 1rem;
+    color: #888;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐾 Hello Pet World</h1>
+  <p>Meet our six cartoon friends &mdash; three dogs and three cats. Filter by type, click a pet to see its details, add favourites, and get a random pet recommendation!</p>
+  <div class="controls">
+    <div class="filters" role="group" aria-label="Filter pets by type">
+      <button type="button" data-filter="all" class="active">All Pets</button>
+      <button type="button" data-filter="dog">Dogs</button>
+      <button type="button" data-filter="cat">Cats</button>
+    </div>
+    <button type="button" id="randomBtn">🎲 Random Pet</button>
+    <p class="counter" aria-live="polite">❤️ Favourites: <span id="favCount">0</span></p>
+  </div>
+</header>
+
+<main>
+  <div id="petGrid" class="grid"></div>
+</main>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName" hidden>
+  <div class="modal-content">
+    <button type="button" id="closeModal" aria-label="Close details">✕</button>
+    <div id="modalEmoji" class="modal-emoji" aria-hidden="true"></div>
+    <h2 id="modalName"></h2>
+    <dl id="modalDetails"></dl>
+    <button type="button" id="modalFav" aria-pressed="false">🤍 Add to favourites</button>
+  </div>
+</div>
+
+<footer>Hello Pet World &mdash; a practice website for BSAD 281.</footer>
+
+<script>
+  var pets = [
+    { id: 1, name: "Biscuit", type: "dog", breed: "Golden Retriever", age: 3, personality: "Friendly and goofy", activity: "Playing fetch", emoji: "🐶" },
+    { id: 2, name: "Milo", type: "dog", breed: "Beagle", age: 2, personality: "Curious and brave", activity: "Sniffing out trails", emoji: "🐕" },
+    { id: 3, name: "Ruby", type: "dog", breed: "French Bulldog", age: 4, personality: "Calm and cuddly", activity: "Napping in the sun", emoji: "🐩" },
+    { id: 4, name: "Whiskers", type: "cat", breed: "Tabby", age: 2, personality: "Playful and quick", activity: "Chasing string", emoji: "🐱" },
+    { id: 5, name: "Luna", type: "cat", breed: "Siamese", age: 1, personality: "Chatty and clever", activity: "Watching birds from the window", emoji: "🐈" },
+    { id: 6, name: "Oliver", type: "cat", breed: "Orange Tabby", age: 5, personality: "Lazy and loyal", activity: "Curling up on warm laps", emoji: "😺" }
+  ];
+
+  var favourites = {};
+  var currentFilter = "all";
+  var currentPetId = null;
+
+  var grid = document.getElementById("petGrid");
+  var favCount = document.getElementById("favCount");
+  var modal = document.getElementById("modal");
+
+  function isFav(id) {
+    return !!favourites[id];
+  }
+
+  function renderPets() {
+    grid.innerHTML = "";
+    var shown = pets.filter(function (pet) {
+      return currentFilter === "all" || pet.type === currentFilter;
+    });
+    shown.forEach(function (pet) {
+      var card = document.createElement("article");
+      card.className = "card";
+      var fav = isFav(pet.id);
+      var ageText = pet.age + (pet.age === 1 ? " year old" : " years old");
+      card.innerHTML =
+        '<div class="pet-emoji" aria-hidden="true">' + pet.emoji + "</div>" +
+        "<h2>" + pet.name + "</h2>" +
+        "<p>" + pet.breed + " &middot; " + ageText + "</p>" +
+        '<p><span class="tag">' + (pet.type === "dog" ? "🐶 Dog" : "🐱 Cat") + "</span></p>" +
+        '<button type="button" class="details-btn">View details</button>' +
+        '<button type="button" class="fav-btn" aria-pressed="' + fav + '">' +
+        (fav ? "❤️ Favourited" : "🤍 Add to favourites") + "</button>";
+      card.querySelector(".details-btn").addEventListener("click", function () {
+        openModal(pet.id);
+      });
+      card.querySelector(".fav-btn").addEventListener("click", function () {
+        toggleFavourite(pet.id);
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function updateFavUI() {
+    var count = 0;
+    for (var key in favourites) {
+      if (favourites[key]) count++;
+    }
+    favCount.textContent = String(count);
+    var modalFav = document.getElementById("modalFav");
+    if (currentPetId !== null) {
+      var fav = isFav(currentPetId);
+      modalFav.textContent = fav ? "❤️ Remove from favourites" : "🤍 Add to favourites";
+      modalFav.setAttribute("aria-pressed", String(fav));
+    }
+  }
+
+  function toggleFavourite(id) {
+    if (favourites[id]) {
+      delete favourites[id];
+    } else {
+      favourites[id] = true;
+    }
+    updateFavUI();
+    renderPets();
+  }
+
+  function openModal(id) {
+    var pet = null;
+    for (var i = 0; i < pets.length; i++) {
+      if (pets[i].id === id) pet = pets[i];
+    }
+    if (!pet) return;
+    currentPetId = id;
+    document.getElementById("modalEmoji").textContent = pet.emoji;
+    document.getElementById("modalName").textContent = pet.name;
+    var ageText = pet.age + (pet.age === 1 ? " year old" : " years old");
+    document.getElementById("modalDetails").innerHTML =
+      "<dt>Type</dt><dd>" + (pet.type === "dog" ? "Dog" : "Cat") + "</dd>" +
+      "<dt>Breed</dt><dd>" + pet.breed + "</dd>" +
+      "<dt>Age</dt><dd>" + ageText + "</dd>" +
+      "<dt>Personality</dt><dd>" + pet.personality + "</dd>" +
+      "<dt>Favourite activity</dt><dd>" + pet.activity + "</dd>";
+    updateFavUI();
+    modal.hidden = false;
+    document.getElementById("closeModal").focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    currentPetId = null;
+  }
+
+  var filterButtons = document.querySelectorAll(".filters button");
+  filterButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      filterButtons.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      currentFilter = btn.getAttribute("data-filter");
+      renderPets();
+    });
+  });
+
+  document.getElementById("randomBtn").addEventListener("click", function () {
+    var pet = pets[Math.floor(Math.random() * pets.length)];
+    openModal(pet.id);
+  });
+
+  document.getElementById("closeModal").addEventListener("click", closeModal);
+
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) closeModal();
+  });
+
+  document.getElementById("modalFav").addEventListener("click", function () {
+    if (currentPetId !== null) toggleFavourite(currentPetId);
+  });
+
+  renderPets();
+  updateFavUI();
+</script>
+</body>
+</html>
